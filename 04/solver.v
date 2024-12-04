@@ -24,6 +24,7 @@ fn main() {
 	]
 
 	mut total := 0
+	mut total2 := 0
 	for i, line in lines {
 		for j, c in line {
 			if c == pattern[0] {
@@ -51,8 +52,24 @@ fn main() {
 					}
 				}
 			}
+
+			if c == `A` {
+					if j < 1 || i < 1 || j >= line.len - 1 || i >= lines.len - 1 {
+						// boundry check first again
+						continue
+					}
+
+					// ugly brute force
+					if ((lines[i - 1][j - 1] == `M` && lines[i + 1][j + 1] == `S`) ||
+						(lines[i - 1][j - 1] == `S` && lines[i + 1][j + 1] == `M`))
+						&& ((lines[i - 1][j + 1] == `M` && lines[i + 1][j - 1] == `S`) ||
+						(lines[i - 1][j + 1] == `S` && lines[i + 1][j - 1] == `M`)) {
+						total2++
+					}
+				}
 		}
 	}
 
 	println('total xmases: ${total}')
+	println('total x-mases: ${total2}')
 }

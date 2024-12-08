@@ -12,12 +12,13 @@ fn main() {
 	grid := os.read_lines('puzzle.input')!
 
 	mut guard := Agent{
-		max_y: grid.len
-		max_x: grid[0].len
-		y:     -1
-		x:     -1
-		dir:   Direction.none
-		moves: 0
+		max_y:      grid.len
+		max_x:      grid[0].len
+		y:          -1
+		x:          -1
+		dir:        Direction.none
+		positions:  0
+		debug_grid: []Direction{len: grid.len * grid[0].len, init: Direction.none}
 	}
 
 	for y, line in grid {
@@ -29,6 +30,9 @@ fn main() {
 			}
 		}
 	}
+	// Capture initial position
+	guard.debug_grid[guard.y * guard.max_x + guard.x] = guard.dir
+	guard.positions++
 
 	if guard.in_bounds(guard.y, guard.x) {
 		println('Guard ${guard.x},${guard.y} - Direction ${guard.dir}')
@@ -46,23 +50,33 @@ fn main() {
 		if guard.in_bounds(guard.y + v[0], guard.x + v[1]) {
 			next := grid[guard.y + v[0]][guard.x + v[1]]
 			if next == `#` {
-				guard.dir = next_dir(guard.dir)
+				guard.dir = guard.dir.next()
 				println('bump. change to dir: ${guard.dir}')
 			} else {
 				guard.y += v[0]
 				guard.x += v[1]
-				guard.moves++
+				if guard.debug_grid[guard.y * guard.max_x + guard.x] == Direction.none {
+					guard.positions++
+				}
+				guard.debug_grid[guard.y * guard.max_x + guard.x] = guard.dir
 			}
 		} else {
 			break
 		}
 	}
 
-	println('Moves: ${guard.moves}')
+	println('positions: ${guard.positions}')
+	// guard.print()
 }
 
-fn next_dir(dir Direction) Direction {
-	return unsafe { Direction((int(dir) + 1) % 4) }
+fn (dir Direction) next() Direction {
+	match dir {
+		.up { return .right }
+		.right { return .down }
+		.down { return .left }
+		.left { return .up }
+		.none { return .none }
+	}
 }
 
 fn (g Agent) in_bounds(y int, x int) bool {
@@ -79,12 +93,38 @@ fn (g Agent) vector() [2]int {
 	}
 }
 
+fn (g Agent) print() {
+	for y in 0 .. g.max_y {
+		for x in 0 .. g.max_x {
+			match g.debug_grid[y * g.max_x + x] {
+				.up {
+					print('^')
+				}
+				.right {
+					print('>')
+				}
+				.down {
+					print('v')
+				}
+				.left {
+					print('<')
+				}
+				else {
+					print('.')
+				}
+			}
+		}
+		print('\n')
+	}
+}
+
 struct Agent {
 	max_y int
 	max_x int
 mut:
-	dir   Direction
-	y     int
-	x     int
-	moves int
+	dir        Direction
+	y          int
+	x          int
+	positions  int
+	debug_grid []Direction
 }

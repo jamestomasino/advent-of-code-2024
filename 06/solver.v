@@ -17,6 +17,7 @@ fn main() {
 		y:     -1
 		x:     -1
 		dir:   Direction.none
+		moves: 0
 	}
 
 	for y, line in grid {
@@ -36,6 +37,28 @@ fn main() {
 	if guard.in_bounds(guard.y, guard.x) {
 		println('Guard ${guard.x},${guard.y} - Direction ${guard.dir}')
 	}
+
+	mut steps := 0
+	for guard.in_bounds(guard.y, guard.x) {
+		steps++
+		if steps > guard.max_y * guard.max_x * 3 {
+			// Just in case
+			return
+		}
+
+		v := guard.vector()
+		next := grid[guard.y + v[0]][guard.x + v[1]]
+		if next == `#` {
+			println('bump')
+			guard.dir = next_dir(guard.dir)
+		} else {
+			guard.y += v[0]
+			guard.x += v[1]
+			guard.moves++
+		}
+	}
+
+	println('Moves: ${guard.moves}')
 }
 
 fn next_dir(dir Direction) Direction {
@@ -60,7 +83,8 @@ struct Agent {
 	max_y int
 	max_x int
 mut:
-	dir Direction
-	y   int
-	x   int
+	dir   Direction
+	y     int
+	x     int
+	moves int
 }

@@ -22,14 +22,10 @@ fn main() {
 
 	for y, line in grid {
 		for x, cell in line {
-			// println('${x},${y}) ${cell}')
-			match cell {
-				`^` {
-					guard.y = y
-					guard.x = x
-					guard.dir = Direction.up
-				}
-				else {}
+			if cell == `^` {
+				guard.y = y
+				guard.x = x
+				guard.dir = Direction.up
 			}
 		}
 	}
@@ -43,18 +39,22 @@ fn main() {
 		steps++
 		if steps > guard.max_y * guard.max_x * 3 {
 			// Just in case
-			return
+			break
 		}
 
 		v := guard.vector()
-		next := grid[guard.y + v[0]][guard.x + v[1]]
-		if next == `#` {
-			println('bump')
-			guard.dir = next_dir(guard.dir)
+		if guard.in_bounds(guard.y + v[0], guard.x + v[1]) {
+			next := grid[guard.y + v[0]][guard.x + v[1]]
+			if next == `#` {
+				guard.dir = next_dir(guard.dir)
+				println('bump. change to dir: ${guard.dir}')
+			} else {
+				guard.y += v[0]
+				guard.x += v[1]
+				guard.moves++
+			}
 		} else {
-			guard.y += v[0]
-			guard.x += v[1]
-			guard.moves++
+			break
 		}
 	}
 
@@ -70,12 +70,12 @@ fn (g Agent) in_bounds(y int, x int) bool {
 }
 
 fn (g Agent) vector() [2]int {
-	return match g.dir {
-		.up { [-1, 0]! }
-		.right { [0, 1]! }
-		.down { [1, 0]! }
-		.left { [0, -1]! }
-		.none { [0, 0]! }
+	match g.dir {
+		.up { return [-1, 0]! }
+		.right { return [0, 1]! }
+		.down { return [1, 0]! }
+		.left { return [0, -1]! }
+		.none { return [0, 0]! }
 	}
 }
 

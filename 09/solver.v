@@ -33,15 +33,11 @@ fn main() {
 		data[l], data[r] = data[r], data[l]
 	}
 
-	println(checksum(data))
-}
-
-fn checksum(data []int) i64 {
 	mut total := i64(0)
 	for i, value in data {
 		if value != -1 {
 			total += value * i
 		}
 	}
-	return total
+	println('checksum: ${total}')
 }

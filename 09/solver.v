@@ -1,6 +1,8 @@
 import os
+import time
 
 fn main() {
+	part1_sw := time.new_stopwatch()
 	input := os.read_file('puzzle.input')!
 
 	// build initial data
@@ -40,4 +42,5 @@ fn main() {
 		}
 	}
 	println('checksum: ${total}')
+	println('part1 time: ${part1_sw.elapsed().nanoseconds()}ns')
 }

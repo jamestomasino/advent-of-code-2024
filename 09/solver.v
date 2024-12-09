@@ -18,33 +18,30 @@ fn main() {
 	}
 
 	// condense
-	mut last_swap := data.len // don't loop into the endless -1s
-	for i, mut v in data {
-		if v != -1 {
-			continue
+	mut l := 0
+	mut r := data.len - 1
+	for {
+		for data[l] != -1 {
+			l++
 		}
-		if i > last_swap {
+		for data[r] == -1 {
+			r--
+		}
+		if l >= r {
 			break
 		}
-		for j := data.len - 1; j > i; j-- {
-			m := data[j]
-			if m == -1 {
-				continue
-			}
-			data[i], data[j] = data[j], data[i]
-			last_swap = j
-			break
-		}
+		data[l], data[r] = data[r], data[l]
 	}
 
-	mut total := 0
-	for i in 0 .. last_swap {
-		if data[i] == -1 {
-			break
-		}
-		total = total + i * data[i]
-		println(data[i])
-	}
+	println(checksum(data))
+}
 
-	println('part 1: ${total}')
+fn checksum(data []int) i64 {
+	mut total := i64(0)
+	for i, value in data {
+		if value != -1 {
+			total += value * i
+		}
+	}
+	return total
 }

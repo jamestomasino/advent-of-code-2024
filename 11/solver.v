@@ -1,76 +1,48 @@
+import arrays
 import os
 
-struct Val {
-	value int
-mut:
-	check bool
-}
-
-enum CheckType {
-	null
-	even
-	other
-}
-
 fn main() {
-	input := os.read_file('puzzle.input')!
-	mut data := input.split(' ').map(mut Val{ value: it.int() })
-	for _ in 0 .. 25 {
-		data = blink(data, CheckType.null)
-		data = blink(data, CheckType.even)
-		data = blink(data, CheckType.other)
-		data.reset()
-	}
-	println('items: ${data.len}')
+	println(blink(25))
+	println(blink(75))
 }
 
-fn blink(arr []Val, t CheckType) []Val {
-	mut new_arr := []Val{}
-	for v in arr {
-		new_arr << change(v, t)
-	}
-	return new_arr
-}
+fn blink(rounds i64) i64 {
+	mut check := map[i64]i64{}
 
-fn (mut arr []Val) reset() {
-	for mut v in arr {
-		v.check = false
+	input := os.read_file('puzzle.input') or { '' }
+	for num in input.split(' ') {
+		check[num.i64()] = 1
 	}
-}
 
-fn change(i Val, check CheckType) []Val {
-	if !i.check {
-		match check {
-			.null {
-				if i.value == 0 {
-					return [Val{
-						value: 1
-						check: true
-					}]
-				}
+	for _ in 0 .. rounds {
+		mut cloned := map[i64]i64{}
+		for key, value in check {
+			cloned[key] = value
+		}
+
+		for num, count in cloned {
+			new_values := if num == 0 {
+				[i64(1)]
+			} else if num.str().len % 2 == 0 {
+				halve_string(num.str())
+			} else {
+				[num * i64(2024)]
 			}
-			.even {
-				len := i.value.str().len
-				if len % 2 == 0 {
-					return [
-						Val{
-							value: i.value.str()[0..len / 2].int()
-							check: true
-						},
-						Val{
-							value: i.value.str()[len / 2..].int()
-							check: true
-						},
-					]
+
+			check[num] -= count
+			for new_value in new_values {
+				if new_value !in check {
+					check[new_value] = 0
 				}
-			}
-			.other {
-				return [Val{
-					value: i.value * 2024
-					check: true
-				}]
+				check[new_value] += count
 			}
 		}
 	}
-	return [i]
+
+	return arrays.sum(check.values()) or { 0 }
+}
+
+fn halve_string(s string) []i64 {
+	half_len := s.len / 2
+	return [s[..half_len].i64(), s[half_len..].i64()]
 }

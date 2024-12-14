@@ -113,7 +113,6 @@ fn main() {
 	for mut r in regions {
 		price += r.area * r.perimiter.len
 
-		// len(P - {(p+d*1j, d) for p,d in P}
 		mut new_set := []Perimiter{}
 		for per in r.perimiter {
 			new_set << Perimiter{

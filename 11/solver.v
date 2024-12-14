@@ -1,9 +1,12 @@
 import arrays
 import os
+import time
 
 fn main() {
+	part1_sw := time.new_stopwatch()
 	println(blink(25))
 	println(blink(75))
+	println('part1 time: ${part1_sw.elapsed().microseconds()}μs')
 }
 
 fn blink(rounds i64) i64 {

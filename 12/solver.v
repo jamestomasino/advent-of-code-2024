@@ -4,8 +4,24 @@ struct Region {
 	id rune
 mut:
 	area      i64
-	perimiter i64
+	perimiter []Perimiter
+	sides     []Perimiter
 	plots     [][]int
+}
+
+struct Perimiter {
+	p Point
+	d Vector
+}
+
+struct Point {
+	x int
+	y int
+}
+
+struct Vector {
+	dx int
+	dy int
 }
 
 fn is_valid_move(row int, col int, max_y int, max_x int) bool {
@@ -35,17 +51,35 @@ fn check_cell(mut region &Region, mut visited [][]bool, grid []string, row int, 
 				}
 			} else {
 				// edge detected
-				region.perimiter += 1
+				region.perimiter << Perimiter{
+					p: Point{
+						y: row
+						x: col
+					}
+					d: Vector{
+						dy: dir[0]
+						dx: dir[1]
+					}
+				}
 			}
 		} else {
 			// grid border, add to perimiter
-			region.perimiter += 1
+			region.perimiter << Perimiter{
+				p: Point{
+					y: row
+					x: col
+				}
+				d: Vector{
+					dy: dir[0]
+					dx: dir[1]
+				}
+			}
 		}
 	}
 }
 
 fn main() {
-	grid := os.read_lines('puzzle.test1.input')!
+	grid := os.read_lines('puzzle.input')!
 
 	max_y := grid.len
 	max_x := grid[0].len
@@ -63,9 +97,8 @@ fn main() {
 				visited[row][col] = true
 				runes := grid[row].runes()
 				mut region := &Region{
-					id:        runes[col]
-					area:      1
-					perimiter: 0
+					id:   runes[col]
+					area: 1
 				}
 				region.plots << [row, col]
 				// check for each direction to see if 0) valid 1) unvisited and 2) matching id
@@ -76,10 +109,35 @@ fn main() {
 	}
 
 	mut price := i64(0)
-	for r in regions {
-		println('Region: ${r.id} (Area ${r.area}, Perimiter ${r.perimiter})')
-		price += r.area * r.perimiter
+	mut price2 := i64(0)
+	for mut r in regions {
+		price += r.area * r.perimiter.len
+
+		// len(P - {(p+d*1j, d) for p,d in P}
+		mut new_set := []Perimiter{}
+		for per in r.perimiter {
+			new_set << Perimiter{
+				p: Point{
+					y: per.p.y - per.d.dx
+					x: per.p.x + per.d.dy
+				}
+				d: per.d
+			}
+		}
+		r.sides = set_subtract(r.perimiter, new_set)
+		price2 += r.area * r.sides.len
+		println('Region: ${r.id} (Area ${r.area}, Perimiter ${r.perimiter.len}, Sides ${r.sides.len})')
 	}
-	println('Region: ${regions[0].id} (${regions[0].plots})')
-	println('Total price: ${price}')
+	println('Part 1 total price: ${price}')
+	println('Part 2 total price: ${price2}')
+}
+
+fn set_subtract[T](set1 []T, set2 []T) []T {
+	mut result := []T{}
+	for item in set1 {
+		if !set2.contains(item) {
+			result << item
+		}
+	}
+	return result
 }
